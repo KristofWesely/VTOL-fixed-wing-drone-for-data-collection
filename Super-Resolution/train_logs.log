@@ -1,0 +1,812 @@
+22-12-04 19:05:35.496 - INFO:   name: distributed_high_sr_ffhq
+  phase: train
+  gpu_ids: [0, 1]
+  path:[
+    log: experiments/distributed_high_sr_ffhq_221204_190535/logs
+    tb_logger: experiments/distributed_high_sr_ffhq_221204_190535/tb_logger
+    results: experiments/distributed_high_sr_ffhq_221204_190535/results
+    checkpoint: experiments/distributed_high_sr_ffhq_221204_190535/checkpoint
+    resume_state: None
+    experiments_root: experiments/distributed_high_sr_ffhq_221204_190535
+  ]
+  datasets:[
+    train:[
+      name: FFHQ
+      mode: HR
+      dataroot: /content/drive/MyDrive/data/train_dsr_100_400
+      datatype: img
+      l_resolution: 100
+      r_resolution: 400
+      batch_size: 2
+      num_workers: 8
+      use_shuffle: True
+      data_len: -1
+    ]
+    val:[
+      name: CelebaHQ
+      mode: LRHR
+      dataroot: /content/drive/MyDrive/data/val_dsr_100_400
+      datatype: img
+      l_resolution: 100
+      r_resolution: 400
+      data_len: 3
+    ]
+  ]
+  model:[
+    which_model_G: sr3
+    finetune_norm: False
+    unet:[
+      in_channel: 6
+      out_channel: 3
+      inner_channel: 64
+      norm_groups: 16
+      channel_multiplier: [1, 2, 4, 8, 16]
+      attn_res: []
+      res_blocks: 1
+      dropout: 0
+    ]
+    beta_schedule:[
+      train:[
+        schedule: linear
+        n_timestep: 2000
+        linear_start: 1e-06
+        linear_end: 0.01
+      ]
+      val:[
+        schedule: linear
+        n_timestep: 2000
+        linear_start: 1e-06
+        linear_end: 0.01
+      ]
+    ]
+    diffusion:[
+      image_size: 400
+      channels: 3
+      conditional: True
+    ]
+  ]
+  train:[
+    n_iter: 100000
+    val_freq: 10000.0
+    save_checkpoint_freq: 10000.0
+    print_freq: 50
+    optimizer:[
+      type: adam
+      lr: 3e-06
+    ]
+    ema_scheduler:[
+      step_start_ema: 5000
+      update_ema_every: 1
+      ema_decay: 0.9999
+    ]
+  ]
+  wandb:[
+    project: distributed_high_sr_ffhq
+  ]
+  distributed: True
+  log_wandb_ckpt: True
+  log_eval: False
+  enable_wandb: True
+
+22-12-04 19:05:38.315 - INFO: Dataset [LRHRDataset - FFHQ] is created.
+22-12-04 19:05:38.334 - INFO: Dataset [LRHRDataset - CelebaHQ] is created.
+22-12-04 19:05:38.334 - INFO: Initial Dataset Finished
+22-12-04 19:05:39.645 - INFO: Initialization method [orthogonal]
+22-12-04 19:05:54.550 - INFO: Network G structure: DataParallel - GaussianDiffusion, with parameters: 155,334,339
+22-12-04 19:05:54.550 - INFO: GaussianDiffusion(
+  (denoise_fn): UNet(
+    (noise_level_mlp): Sequential(
+      (0): PositionalEncoding()
+      (1): Linear(in_features=64, out_features=256, bias=True)
+      (2): Swish()
+      (3): Linear(in_features=256, out_features=64, bias=True)
+    )
+    (downs): ModuleList(
+      (0): Conv2d(6, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=64, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 64, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 64, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Identity()
+        )
+      )
+      (2): Downsample(
+        (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+      )
+      (3): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=128, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 64, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 128, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (4): Downsample(
+        (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+      )
+      (5): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=256, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 128, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 256, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (6): Downsample(
+        (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+      )
+      (7): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=512, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 256, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 512, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (8): Downsample(
+        (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+      )
+      (9): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=1024, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 512, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(512, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+    )
+    (mid): ModuleList(
+      (0): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=1024, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Identity()
+        )
+        (attn): SelfAttention(
+          (norm): GroupNorm(16, 1024, eps=1e-05, affine=True)
+          (qkv): Conv2d(1024, 3072, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (out): Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (1): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=1024, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Identity()
+        )
+      )
+    )
+    (ups): ModuleList(
+      (0): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=1024, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 2048, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(2048, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(2048, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (1): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=1024, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1536, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1536, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1024, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(1536, 1024, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (2): Upsample(
+        (up): Upsample(scale_factor=2.0, mode=nearest)
+        (conv): Conv2d(1024, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (3): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=512, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 1536, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(1536, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 512, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(1536, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (4): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=512, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 768, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(768, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 512, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(768, 512, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (5): Upsample(
+        (up): Upsample(scale_factor=2.0, mode=nearest)
+        (conv): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (6): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=256, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 768, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(768, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 256, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(768, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (7): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=256, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 384, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(384, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 256, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(384, 256, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (8): Upsample(
+        (up): Upsample(scale_factor=2.0, mode=nearest)
+        (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (9): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=128, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 384, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(384, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 128, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(384, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (10): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=128, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 192, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(192, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 128, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(192, 128, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (11): Upsample(
+        (up): Upsample(scale_factor=2.0, mode=nearest)
+        (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (12): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=64, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 192, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(192, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 64, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(192, 64, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+      (13): ResnetBlocWithAttn(
+        (res_block): ResnetBlock(
+          (noise_func): FeatureWiseAffine(
+            (noise_func): Sequential(
+              (0): Linear(in_features=64, out_features=64, bias=True)
+            )
+          )
+          (block1): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 128, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (block2): Block(
+            (block): Sequential(
+              (0): GroupNorm(16, 64, eps=1e-05, affine=True)
+              (1): Swish()
+              (2): Identity()
+              (3): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            )
+          )
+          (res_conv): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+        )
+      )
+    )
+    (final_conv): Block(
+      (block): Sequential(
+        (0): GroupNorm(16, 64, eps=1e-05, affine=True)
+        (1): Swish()
+        (2): Identity()
+        (3): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+    )
+  )
+  (loss_func): L1Loss()
+)
+22-12-04 19:05:54.623 - INFO: Model [DDPM] is created.
+22-12-04 19:05:54.624 - INFO: Initial Model Finished
+22-12-04 19:07:01.337 - INFO: <epoch:  1, iter:      50> l_pix: 7.7978e-01 
+22-12-04 19:07:54.753 - INFO: <epoch:  1, iter:     100> l_pix: 8.0155e-01 
+22-12-04 19:08:48.770 - INFO: <epoch:  1, iter:     150> l_pix: 7.1621e-01 
+22-12-04 19:09:43.176 - INFO: <epoch:  1, iter:     200> l_pix: 6.8606e-01 
+22-12-04 19:10:37.818 - INFO: <epoch:  1, iter:     250> l_pix: 6.4084e-01 
+22-12-04 19:11:32.676 - INFO: <epoch:  1, iter:     300> l_pix: 5.9646e-01 
+22-12-04 19:12:27.575 - INFO: <epoch:  1, iter:     350> l_pix: 5.8726e-01 
+22-12-04 19:13:22.584 - INFO: <epoch:  1, iter:     400> l_pix: 5.3100e-01 
+22-12-04 19:14:17.635 - INFO: <epoch:  1, iter:     450> l_pix: 4.8898e-01 
+22-12-04 19:15:12.741 - INFO: <epoch:  1, iter:     500> l_pix: 8.2587e-01 
+22-12-04 19:16:07.873 - INFO: <epoch:  1, iter:     550> l_pix: 4.2613e-01 
+22-12-04 19:17:02.991 - INFO: <epoch:  1, iter:     600> l_pix: 5.6715e-01 
+22-12-04 19:17:58.123 - INFO: <epoch:  1, iter:     650> l_pix: 3.8769e-01 
+22-12-04 19:18:53.299 - INFO: <epoch:  1, iter:     700> l_pix: 3.7415e-01 
+22-12-04 19:19:48.412 - INFO: <epoch:  1, iter:     750> l_pix: 3.4492e-01 
+22-12-04 19:20:43.588 - INFO: <epoch:  1, iter:     800> l_pix: 3.8587e-01 
+22-12-04 19:21:38.831 - INFO: <epoch:  1, iter:     850> l_pix: 3.1551e-01 
+22-12-04 19:22:34.019 - INFO: <epoch:  1, iter:     900> l_pix: 2.8832e-01 
+22-12-04 19:23:29.229 - INFO: <epoch:  1, iter:     950> l_pix: 2.7969e-01 
+22-12-04 19:24:24.422 - INFO: <epoch:  1, iter:   1,000> l_pix: 5.8568e-01 
+22-12-04 19:25:19.663 - INFO: <epoch:  1, iter:   1,050> l_pix: 2.6280e-01 
+22-12-04 19:26:14.856 - INFO: <epoch:  1, iter:   1,100> l_pix: 2.5460e-01 
+22-12-04 19:27:10.085 - INFO: <epoch:  1, iter:   1,150> l_pix: 2.4729e-01 
+22-12-04 19:28:05.295 - INFO: <epoch:  1, iter:   1,200> l_pix: 2.4167e-01 
+22-12-04 19:29:00.574 - INFO: <epoch:  1, iter:   1,250> l_pix: 2.3759e-01 
+22-12-04 19:29:55.764 - INFO: <epoch:  1, iter:   1,300> l_pix: 2.2200e-01 
+22-12-04 19:30:50.927 - INFO: <epoch:  1, iter:   1,350> l_pix: 2.3504e-01 
+22-12-04 19:31:46.174 - INFO: <epoch:  1, iter:   1,400> l_pix: 2.3027e-01 
+22-12-04 19:32:41.307 - INFO: <epoch:  1, iter:   1,450> l_pix: 2.1109e-01 
+22-12-04 19:33:36.439 - INFO: <epoch:  1, iter:   1,500> l_pix: 2.0709e-01 
+22-12-04 19:34:31.564 - INFO: <epoch:  1, iter:   1,550> l_pix: 2.0704e-01 
+22-12-04 19:35:26.760 - INFO: <epoch:  1, iter:   1,600> l_pix: 2.1028e-01 
+22-12-04 19:36:29.204 - INFO: <epoch:  2, iter:   1,650> l_pix: 1.9765e-01 
+22-12-04 19:37:24.328 - INFO: <epoch:  2, iter:   1,700> l_pix: 1.9264e-01 
+22-12-04 19:38:19.491 - INFO: <epoch:  2, iter:   1,750> l_pix: 1.8726e-01 
+22-12-04 19:39:14.621 - INFO: <epoch:  2, iter:   1,800> l_pix: 3.6268e-01 
+22-12-04 19:40:09.765 - INFO: <epoch:  2, iter:   1,850> l_pix: 1.8694e-01 
+22-12-04 19:41:04.900 - INFO: <epoch:  2, iter:   1,900> l_pix: 1.8162e-01 
+22-12-04 19:42:00.067 - INFO: <epoch:  2, iter:   1,950> l_pix: 2.0744e-01 
+22-12-04 19:42:55.210 - INFO: <epoch:  2, iter:   2,000> l_pix: 1.7872e-01 
+22-12-04 19:43:50.366 - INFO: <epoch:  2, iter:   2,050> l_pix: 1.7309e-01 
+22-12-04 19:44:45.587 - INFO: <epoch:  2, iter:   2,100> l_pix: 1.7219e-01 
+22-12-04 19:45:40.736 - INFO: <epoch:  2, iter:   2,150> l_pix: 1.7062e-01 
+22-12-04 19:46:35.918 - INFO: <epoch:  2, iter:   2,200> l_pix: 4.4172e-01 
+22-12-04 19:47:31.032 - INFO: <epoch:  2, iter:   2,250> l_pix: 1.8724e-01 
+22-12-04 19:48:26.278 - INFO: <epoch:  2, iter:   2,300> l_pix: 1.6428e-01 
+22-12-04 19:49:21.420 - INFO: <epoch:  2, iter:   2,350> l_pix: 1.5978e-01 
+22-12-04 19:50:16.579 - INFO: <epoch:  2, iter:   2,400> l_pix: 1.8934e-01 
+22-12-04 19:51:11.758 - INFO: <epoch:  2, iter:   2,450> l_pix: 1.9187e-01 
+22-12-04 19:52:06.940 - INFO: <epoch:  2, iter:   2,500> l_pix: 1.5976e-01 
+22-12-04 19:53:02.134 - INFO: <epoch:  2, iter:   2,550> l_pix: 1.5481e-01 
+22-12-04 19:53:57.261 - INFO: <epoch:  2, iter:   2,600> l_pix: 1.5380e-01 
+22-12-04 19:54:52.483 - INFO: <epoch:  2, iter:   2,650> l_pix: 2.4410e-01 
+22-12-04 19:55:47.637 - INFO: <epoch:  2, iter:   2,700> l_pix: 1.5949e-01 
+22-12-04 19:56:42.829 - INFO: <epoch:  2, iter:   2,750> l_pix: 3.5581e-01 
+22-12-04 19:57:38.000 - INFO: <epoch:  2, iter:   2,800> l_pix: 3.8700e-01 
+22-12-04 19:58:33.216 - INFO: <epoch:  2, iter:   2,850> l_pix: 1.4670e-01 
+22-12-04 19:59:28.375 - INFO: <epoch:  2, iter:   2,900> l_pix: 2.1586e-01 
+22-12-04 20:00:23.515 - INFO: <epoch:  2, iter:   2,950> l_pix: 1.4587e-01 
+22-12-04 20:01:18.715 - INFO: <epoch:  2, iter:   3,000> l_pix: 1.4476e-01 
+22-12-04 20:02:13.910 - INFO: <epoch:  2, iter:   3,050> l_pix: 1.4638e-01 
+22-12-04 20:03:09.092 - INFO: <epoch:  2, iter:   3,100> l_pix: 1.3969e-01 
+22-12-04 20:04:04.272 - INFO: <epoch:  2, iter:   3,150> l_pix: 1.4080e-01 
+22-12-04 20:04:59.504 - INFO: <epoch:  2, iter:   3,200> l_pix: 1.4529e-01 
+22-12-04 20:05:55.008 - INFO: <epoch:  3, iter:   3,250> l_pix: 1.3701e-01 
+22-12-04 20:06:50.133 - INFO: <epoch:  3, iter:   3,300> l_pix: 1.5035e-01 
+22-12-04 20:07:45.326 - INFO: <epoch:  3, iter:   3,350> l_pix: 3.2527e-01 
+22-12-04 20:08:40.515 - INFO: <epoch:  3, iter:   3,400> l_pix: 1.7038e-01 
+22-12-04 20:09:35.657 - INFO: <epoch:  3, iter:   3,450> l_pix: 1.3892e-01 
+22-12-04 20:10:30.826 - INFO: <epoch:  3, iter:   3,500> l_pix: 1.9495e-01 
+22-12-04 20:11:26.111 - INFO: <epoch:  3, iter:   3,550> l_pix: 1.3006e-01 
+22-12-04 20:12:21.291 - INFO: <epoch:  3, iter:   3,600> l_pix: 2.9146e-01 
+22-12-04 20:13:16.485 - INFO: <epoch:  3, iter:   3,650> l_pix: 1.7407e-01 
+22-12-04 20:14:11.677 - INFO: <epoch:  3, iter:   3,700> l_pix: 1.4463e-01 
+22-12-04 20:15:06.795 - INFO: <epoch:  3, iter:   3,750> l_pix: 1.5140e-01 
+22-12-04 20:16:01.833 - INFO: <epoch:  3, iter:   3,800> l_pix: 1.6495e-01 
+22-12-04 20:16:56.864 - INFO: <epoch:  3, iter:   3,850> l_pix: 1.2739e-01 
+22-12-04 20:17:51.997 - INFO: <epoch:  3, iter:   3,900> l_pix: 1.5313e-01 
+22-12-04 20:18:47.070 - INFO: <epoch:  3, iter:   3,950> l_pix: 1.2466e-01 
+22-12-04 20:19:42.075 - INFO: <epoch:  3, iter:   4,000> l_pix: 2.1345e-01 
+22-12-04 20:20:37.192 - INFO: <epoch:  3, iter:   4,050> l_pix: 1.9265e-01 
+22-12-04 20:21:32.214 - INFO: <epoch:  3, iter:   4,100> l_pix: 1.9207e-01 
+22-12-04 20:22:27.267 - INFO: <epoch:  3, iter:   4,150> l_pix: 2.2112e-01 
+22-12-04 20:23:22.386 - INFO: <epoch:  3, iter:   4,200> l_pix: 1.2119e-01 
+22-12-04 20:24:17.485 - INFO: <epoch:  3, iter:   4,250> l_pix: 1.5528e-01 
+22-12-04 20:25:12.551 - INFO: <epoch:  3, iter:   4,300> l_pix: 1.2117e-01 
+22-12-04 20:26:07.655 - INFO: <epoch:  3, iter:   4,350> l_pix: 1.2398e-01 
+22-12-04 20:27:02.782 - INFO: <epoch:  3, iter:   4,400> l_pix: 4.4444e-01 
+22-12-04 20:27:57.869 - INFO: <epoch:  3, iter:   4,450> l_pix: 1.1687e-01 
+22-12-04 20:28:52.920 - INFO: <epoch:  3, iter:   4,500> l_pix: 1.6762e-01 
+22-12-04 20:29:48.012 - INFO: <epoch:  3, iter:   4,550> l_pix: 2.1751e-01 
+22-12-04 20:30:43.171 - INFO: <epoch:  3, iter:   4,600> l_pix: 1.8458e-01 
+22-12-04 20:31:38.260 - INFO: <epoch:  3, iter:   4,650> l_pix: 1.1652e-01 
+22-12-04 20:32:33.372 - INFO: <epoch:  3, iter:   4,700> l_pix: 1.1549e-01 
+22-12-04 20:33:28.513 - INFO: <epoch:  3, iter:   4,750> l_pix: 1.1523e-01 
+22-12-04 20:34:23.609 - INFO: <epoch:  3, iter:   4,800> l_pix: 1.4283e-01 
+22-12-04 20:35:18.718 - INFO: <epoch:  3, iter:   4,850> l_pix: 1.2031e-01 
+22-12-04 20:36:14.151 - INFO: <epoch:  4, iter:   4,900> l_pix: 1.4685e-01 
+22-12-04 20:37:09.325 - INFO: <epoch:  4, iter:   4,950> l_pix: 4.8937e-01 
+22-12-04 20:38:04.441 - INFO: <epoch:  4, iter:   5,000> l_pix: 1.1197e-01 
+22-12-04 20:38:59.485 - INFO: <epoch:  4, iter:   5,050> l_pix: 2.3370e-01 
+22-12-04 20:39:54.534 - INFO: <epoch:  4, iter:   5,100> l_pix: 1.1241e-01 
+22-12-04 20:40:49.641 - INFO: <epoch:  4, iter:   5,150> l_pix: 7.8030e-01 
+22-12-04 20:41:44.768 - INFO: <epoch:  4, iter:   5,200> l_pix: 1.1236e-01 
+22-12-04 20:42:39.895 - INFO: <epoch:  4, iter:   5,250> l_pix: 1.1109e-01 
+22-12-04 20:43:35.116 - INFO: <epoch:  4, iter:   5,300> l_pix: 1.1028e-01 
+22-12-04 20:44:30.288 - INFO: <epoch:  4, iter:   5,350> l_pix: 2.5287e-01 
+22-12-04 20:45:25.479 - INFO: <epoch:  4, iter:   5,400> l_pix: 1.1043e-01 
+22-12-04 20:46:20.720 - INFO: <epoch:  4, iter:   5,450> l_pix: 1.6236e-01 
+22-12-04 20:47:15.929 - INFO: <epoch:  4, iter:   5,500> l_pix: 4.6194e-01 
+22-12-04 20:48:11.134 - INFO: <epoch:  4, iter:   5,550> l_pix: 1.4877e-01 
+22-12-04 20:49:06.335 - INFO: <epoch:  4, iter:   5,600> l_pix: 1.0872e-01 
+22-12-04 20:50:01.434 - INFO: <epoch:  4, iter:   5,650> l_pix: 1.0537e-01 
+22-12-04 20:50:56.460 - INFO: <epoch:  4, iter:   5,700> l_pix: 1.0761e-01 
+22-12-04 20:51:51.529 - INFO: <epoch:  4, iter:   5,750> l_pix: 1.0628e-01 
+22-12-04 20:52:46.712 - INFO: <epoch:  4, iter:   5,800> l_pix: 1.0826e-01 
+22-12-04 20:53:41.884 - INFO: <epoch:  4, iter:   5,850> l_pix: 1.0188e-01 
+22-12-04 20:54:37.038 - INFO: <epoch:  4, iter:   5,900> l_pix: 1.1008e-01 
+22-12-04 20:55:32.252 - INFO: <epoch:  4, iter:   5,950> l_pix: 1.2235e-01 
+22-12-04 20:56:27.477 - INFO: <epoch:  4, iter:   6,000> l_pix: 1.1657e-01 
+22-12-04 20:57:22.635 - INFO: <epoch:  4, iter:   6,050> l_pix: 1.2762e-01 
+22-12-04 20:58:17.854 - INFO: <epoch:  4, iter:   6,100> l_pix: 2.1134e-01 
+22-12-04 20:59:13.084 - INFO: <epoch:  4, iter:   6,150> l_pix: 1.0480e-01 
+22-12-04 21:00:08.436 - INFO: <epoch:  4, iter:   6,200> l_pix: 1.0636e-01 
+22-12-04 21:01:03.668 - INFO: <epoch:  4, iter:   6,250> l_pix: 1.0490e-01 
+22-12-04 21:01:58.893 - INFO: <epoch:  4, iter:   6,300> l_pix: 1.8155e-01 
+22-12-04 21:02:54.126 - INFO: <epoch:  4, iter:   6,350> l_pix: 1.0913e-01 
+22-12-04 21:03:49.469 - INFO: <epoch:  4, iter:   6,400> l_pix: 1.1288e-01 
+22-12-04 21:04:44.910 - INFO: <epoch:  4, iter:   6,450> l_pix: 1.0299e-01 
+22-12-04 21:05:40.410 - INFO: <epoch:  5, iter:   6,500> l_pix: 1.0275e-01 
+22-12-04 21:06:35.616 - INFO: <epoch:  5, iter:   6,550> l_pix: 1.5548e-01 
+22-12-04 21:07:30.760 - INFO: <epoch:  5, iter:   6,600> l_pix: 9.6375e-02 
+22-12-04 21:08:26.011 - INFO: <epoch:  5, iter:   6,650> l_pix: 9.7581e-02 
+22-12-04 21:09:21.187 - INFO: <epoch:  5, iter:   6,700> l_pix: 9.9282e-02 
+22-12-04 21:10:16.521 - INFO: <epoch:  5, iter:   6,750> l_pix: 1.7490e-01 
+22-12-04 21:11:11.882 - INFO: <epoch:  5, iter:   6,800> l_pix: 9.8614e-02 
+22-12-04 21:12:07.189 - INFO: <epoch:  5, iter:   6,850> l_pix: 9.7533e-02 
+22-12-04 21:13:02.470 - INFO: <epoch:  5, iter:   6,900> l_pix: 9.8670e-02 
+22-12-04 21:13:57.753 - INFO: <epoch:  5, iter:   6,950> l_pix: 1.0148e-01 
+22-12-04 21:14:52.900 - INFO: <epoch:  5, iter:   7,000> l_pix: 2.3036e-01 
+22-12-04 21:15:48.044 - INFO: <epoch:  5, iter:   7,050> l_pix: 1.7117e-01 
+22-12-04 21:16:43.196 - INFO: <epoch:  5, iter:   7,100> l_pix: 1.6913e-01 
+22-12-04 21:17:38.493 - INFO: <epoch:  5, iter:   7,150> l_pix: 1.2404e-01 
+22-12-04 21:18:33.719 - INFO: <epoch:  5, iter:   7,200> l_pix: 9.4098e-02 
+22-12-04 21:19:28.902 - INFO: <epoch:  5, iter:   7,250> l_pix: 4.0358e-01 
+22-12-04 21:20:24.147 - INFO: <epoch:  5, iter:   7,300> l_pix: 9.5738e-02 
+22-12-04 21:21:19.356 - INFO: <epoch:  5, iter:   7,350> l_pix: 1.8191e-01 
+22-12-04 21:22:14.634 - INFO: <epoch:  5, iter:   7,400> l_pix: 9.4838e-02 
+22-12-04 21:23:10.043 - INFO: <epoch:  5, iter:   7,450> l_pix: 9.2372e-02 
+22-12-04 21:24:05.187 - INFO: <epoch:  5, iter:   7,500> l_pix: 2.9457e-01 
+22-12-04 21:25:00.351 - INFO: <epoch:  5, iter:   7,550> l_pix: 1.0102e-01 
+22-12-04 21:25:55.604 - INFO: <epoch:  5, iter:   7,600> l_pix: 9.1043e-02 
+22-12-04 21:26:50.894 - INFO: <epoch:  5, iter:   7,650> l_pix: 1.0867e-01 
+22-12-04 21:27:46.176 - INFO: <epoch:  5, iter:   7,700> l_pix: 1.8213e-01 
+22-12-04 21:28:41.382 - INFO: <epoch:  5, iter:   7,750> l_pix: 1.1817e-01 
+22-12-04 21:29:36.611 - INFO: <epoch:  5, iter:   7,800> l_pix: 1.1084e-01 
+22-12-04 21:30:31.817 - INFO: <epoch:  5, iter:   7,850> l_pix: 3.1095e-01 
+22-12-04 21:31:27.074 - INFO: <epoch:  5, iter:   7,900> l_pix: 1.9305e-01 
+22-12-04 21:32:22.338 - INFO: <epoch:  5, iter:   7,950> l_pix: 8.9108e-02 
+22-12-04 21:33:17.535 - INFO: <epoch:  5, iter:   8,000> l_pix: 1.6163e-01 
+22-12-04 21:34:12.651 - INFO: <epoch:  5, iter:   8,050> l_pix: 1.6911e-01 
+22-12-04 21:35:08.244 - INFO: <epoch:  6, iter:   8,100> l_pix: 1.1740e-01 
+22-12-04 21:36:03.435 - INFO: <epoch:  6, iter:   8,150> l_pix: 9.2875e-02 
+22-12-04 21:36:58.709 - INFO: <epoch:  6, iter:   8,200> l_pix: 9.1147e-02 
+22-12-04 21:37:54.062 - INFO: <epoch:  6, iter:   8,250> l_pix: 9.0354e-02 
+22-12-04 21:38:49.415 - INFO: <epoch:  6, iter:   8,300> l_pix: 2.6675e-01 
+22-12-04 21:39:44.716 - INFO: <epoch:  6, iter:   8,350> l_pix: 1.3633e-01 
+22-12-04 21:40:40.055 - INFO: <epoch:  6, iter:   8,400> l_pix: 3.6212e-01 
+22-12-04 21:41:35.442 - INFO: <epoch:  6, iter:   8,450> l_pix: 9.9691e-02 
+22-12-04 21:42:30.631 - INFO: <epoch:  6, iter:   8,500> l_pix: 8.8834e-02 
+22-12-04 21:43:25.796 - INFO: <epoch:  6, iter:   8,550> l_pix: 9.1182e-02 
+22-12-04 21:44:21.041 - INFO: <epoch:  6, iter:   8,600> l_pix: 8.7713e-02 
+22-12-04 21:45:16.276 - INFO: <epoch:  6, iter:   8,650> l_pix: 1.0593e-01 
+22-12-04 21:46:11.528 - INFO: <epoch:  6, iter:   8,700> l_pix: 8.4857e-02 
+22-12-04 21:47:06.760 - INFO: <epoch:  6, iter:   8,750> l_pix: 8.3038e-02 
+22-12-04 21:48:01.959 - INFO: <epoch:  6, iter:   8,800> l_pix: 8.2683e-01 
+22-12-04 21:48:57.158 - INFO: <epoch:  6, iter:   8,850> l_pix: 1.0584e-01 
+22-12-04 21:49:52.390 - INFO: <epoch:  6, iter:   8,900> l_pix: 3.5803e-01 
+22-12-04 21:50:47.635 - INFO: <epoch:  6, iter:   8,950> l_pix: 1.1250e-01 
+22-12-04 21:51:42.909 - INFO: <epoch:  6, iter:   9,000> l_pix: 9.2701e-02 
+22-12-04 21:52:38.009 - INFO: <epoch:  6, iter:   9,050> l_pix: 8.3907e-02 
+22-12-04 21:53:33.226 - INFO: <epoch:  6, iter:   9,100> l_pix: 4.1258e-01 
+22-12-04 21:54:28.429 - INFO: <epoch:  6, iter:   9,150> l_pix: 1.0678e-01 
+22-12-04 21:55:23.569 - INFO: <epoch:  6, iter:   9,200> l_pix: 1.1746e-01 
+22-12-04 21:56:18.776 - INFO: <epoch:  6, iter:   9,250> l_pix: 8.4736e-02 
+22-12-04 21:57:13.897 - INFO: <epoch:  6, iter:   9,300> l_pix: 8.7155e-01 
+22-12-04 21:58:09.021 - INFO: <epoch:  6, iter:   9,350> l_pix: 3.2352e-01 
+22-12-04 21:59:04.115 - INFO: <epoch:  6, iter:   9,400> l_pix: 1.3371e-01 
+22-12-04 21:59:59.147 - INFO: <epoch:  6, iter:   9,450> l_pix: 7.9656e-02 
+22-12-04 22:00:54.244 - INFO: <epoch:  6, iter:   9,500> l_pix: 9.0326e-02 
+22-12-04 22:01:49.385 - INFO: <epoch:  6, iter:   9,550> l_pix: 8.2884e-02 
+22-12-04 22:02:44.539 - INFO: <epoch:  6, iter:   9,600> l_pix: 8.1461e-02 
+22-12-04 22:03:39.659 - INFO: <epoch:  6, iter:   9,650> l_pix: 8.1876e-02 
+22-12-04 22:04:34.776 - INFO: <epoch:  6, iter:   9,700> l_pix: 8.5325e-02 
+22-12-04 22:05:30.172 - INFO: <epoch:  7, iter:   9,750> l_pix: 7.9048e-02 
+22-12-04 22:06:25.285 - INFO: <epoch:  7, iter:   9,800> l_pix: 8.3938e-02 
+22-12-04 22:07:20.418 - INFO: <epoch:  7, iter:   9,850> l_pix: 8.4069e-02 
+22-12-04 22:08:15.551 - INFO: <epoch:  7, iter:   9,900> l_pix: 8.2724e-02 
+22-12-04 22:09:10.706 - INFO: <epoch:  7, iter:   9,950> l_pix: 1.8877e-01 
+22-12-04 22:10:05.857 - INFO: <epoch:  7, iter:  10,000> l_pix: 1.0549e-01 
+22-12-04 22:29:44.489 - INFO: # Validation # PSNR: 2.1309e+01
+22-12-04 22:29:44.490 - INFO: <epoch:  7, iter:  10,000> psnr: 2.1309e+01
+22-12-04 22:29:44.491 - INFO: Saving models and training states.
+22-12-04 22:29:52.234 - INFO: Saved model in [experiments/distributed_high_sr_ffhq_221204_190535/checkpoint/I10000_E7_gen.pth] ...
+22-12-04 22:30:58.134 - INFO: <epoch:  7, iter:  10,050> l_pix: 1.0099e-01 
+22-12-04 22:31:52.875 - INFO: <epoch:  7, iter:  10,100> l_pix: 7.8715e-02 
+22-12-04 22:32:47.770 - INFO: <epoch:  7, iter:  10,150> l_pix: 1.3979e-01 
+22-12-04 22:33:42.818 - INFO: <epoch:  7, iter:  10,200> l_pix: 1.6176e-01 
+22-12-04 22:34:37.836 - INFO: <epoch:  7, iter:  10,250> l_pix: 8.5475e-02 
+22-12-04 22:35:32.900 - INFO: <epoch:  7, iter:  10,300> l_pix: 8.2257e-02 
+22-12-04 22:36:28.062 - INFO: <epoch:  7, iter:  10,350> l_pix: 1.1640e-01 
+22-12-04 22:37:23.211 - INFO: <epoch:  7, iter:  10,400> l_pix: 3.5701e-01 
+22-12-04 22:38:18.381 - INFO: <epoch:  7, iter:  10,450> l_pix: 1.3717e-01 
+22-12-04 22:39:13.549 - INFO: <epoch:  7, iter:  10,500> l_pix: 8.9487e-02 
