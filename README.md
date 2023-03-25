@@ -5,7 +5,7 @@ The `Calculations.ipynb` Jupyter notebook contains important calculations such a
 
 The `Flight logs` folder contians the vehicle logs recorded during the testing session
 
-The `Parts` folder contains all the parts designed and used during the thesis. The parts of E-VTOL-1 by Eclipson are under copyright, therefore they are not shared.
+The `Parts` folder contains all the parts designed and used during the thesis. The parts of E-VTOL-1 by Eclipson are under copyright, therefore they are not shared - Source: https://www.eclipson-airplanes.com/e-vtol-1
 
 The `Software` folder contains the `Tailsitter_ArduPilot_parameters.param` with the parameters for ArduPilot used by the Tailsitter prototype.
 
