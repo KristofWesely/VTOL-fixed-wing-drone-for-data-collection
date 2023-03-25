@@ -7,5 +7,6 @@ The Flight logs folder contians the vehicle logs recorded during the testing ses
 
 The parts folder contains all the parts designed and used during the thesis. The parts of E-VTOL-1 by Eclipson are under copyright, therefore they are not shared.
 
-Lasly the Super-Resolution folder contains Jupyter notebooks for processing aerial images and applying a range of different SR models to compare. Real-ESRGAN outperformed all the other models, therefore it was chosen to be finetuned using the DSR dataset - Source: https://github.com/IVRL/DSR
+The Software folder contains the Data_collection.py script which runs on a Raspberry Pi mounted on the prototype to collect aerial data periodically.
 
+Lasly the Software/Super-Resolution folder contains Jupyter notebooks for processing aerial images and applying a range of different SR models to compare. Real-ESRGAN outperformed all the other models, therefore it was chosen to be finetuned using the DSR dataset - Source: https://github.com/IVRL/DSR
